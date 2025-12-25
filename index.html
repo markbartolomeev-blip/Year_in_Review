@@ -1,544 +1,171 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Telegram Chat Stats PRO</title>
+    <title>Telegram Stats</title>
     <meta charset="utf-8">
     <style>
-        body { 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            margin: 0; 
-            padding: 20px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-        }
-        .upload-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            text-align: center;
-            border: 3px dashed #3498db;
-        }
-        input[type="file"] {
-            padding: 15px;
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            margin: 15px;
-            width: 70%;
-        }
-        button {
-            background: linear-gradient(45deg, #2ecc71, #1abc9c);
-            color: white;
-            border: none;
-            padding: 18px 40px;
-            font-size: 18px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.3s, box-shadow 0.3s;
-            margin: 15px;
-        }
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            border-left: 5px solid #3498db;
-        }
-        .stat-card.wide {
-            grid-column: span 2;
-        }
-        .stat-card h3 {
-            color: #2c3e50;
-            margin-top: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        th {
-            background: #f8f9fa;
-            padding: 12px;
-            text-align: left;
-            color: #495057;
-            font-weight: 600;
-            border-bottom: 2px solid #dee2e6;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-        tr:hover {
-            background: #f8f9fa;
-        }
-        .medal {
-            font-size: 1.2em;
-            margin-right: 10px;
-        }
-        .month-bar {
-            height: 20px;
-            background: linear-gradient(90deg, #3498db, #2ecc71);
-            border-radius: 10px;
-            margin: 5px 0;
-            transition: width 0.5s;
-        }
-        .badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-        .photo-badge { background: #e3f2fd; color: #1976d2; }
-        .video-badge { background: #f3e5f5; color: #7b1fa2; }
-        .day-badge { 
-            background: #fff3e0; 
-            color: #ef6c00; 
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 4px;
-        }
-        .loading {
-            text-align: center;
-            padding: 40px;
-            font-size: 18px;
-            color: #666;
-        }
-        .hidden { display: none; }
-        .total-count {
-            font-size: 2.5em;
-            color: #2c3e50;
-            font-weight: bold;
-            text-align: center;
-            margin: 20px 0;
-        }
-        .user-peak-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        .user-peak-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #ff9800;
-        }
-        .user-name {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
-        }
-        .peak-day {
-            color: #e65100;
-            font-size: 1em;
-            margin: 5px 0;
-        }
-        .peak-count {
-            color: #d84315;
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-        .total-count-small {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 3px;
-        }
-        @media (max-width: 768px) {
-            .stat-card.wide { grid-column: span 1; }
-            .stats-grid { grid-template-columns: 1fr; }
-        }
+        body { font-family: Arial; padding: 20px; background: #f0f2f5; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 30px; border-radius: 10px; }
+        h1 { color: #2c3e50; text-align: center; }
+        .card { background: white; padding: 20px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background: #f8f9fa; }
+        .error { color: red; background: #ffe6e6; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .success { color: green; background: #e6ffe6; padding: 10px; border-radius: 5px; margin: 10px 0; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📊 Telegram Chat Analyzer PRO</h1>
+        <h1>📊 Анализатор чата Telegram</h1>
         
-        <div class="upload-section">
-            <h2>1. Загрузите файл result.json</h2>
+        <div class="card">
+            <h3>1. Выберите файл result.json</h3>
             <input type="file" id="fileInput" accept=".json">
-            <br>
-            <button onclick="analyzeChat()">🚀 Запустить анализ</button>
+            <button onclick="analyze()" style="padding: 10px 20px; margin-top: 10px;">Анализировать</button>
         </div>
         
-        <div id="loading" class="loading hidden">
-            <p>🔍 Анализирую данные... Это займет несколько секунд</p>
-            <div style="width: 100%; height: 4px; background: #eee; border-radius: 2px; margin: 20px auto;">
-                <div id="progressBar" style="width: 0%; height: 100%; background: #2ecc71; border-radius: 2px; transition: width 0.5s;"></div>
-            </div>
-        </div>
+        <div id="error" class="error hidden"></div>
+        <div id="success" class="success hidden"></div>
         
-        <div id="results" class="hidden">
-            <div class="total-count" id="totalMessages"></div>
-            
-            <div class="stats-grid">
-                <!-- 1. Все участники с пиковым днем -->
-                <div class="stat-card wide">
-                    <h3>👥 Все участники и их самый активный день</h3>
-                    <table id="allUsersTable">
-                        <thead>
-                            <tr>
-                                <th>Место</th>
-                                <th>Участник</th>
-                                <th>Всего сообщений</th>
-                                <th>Самый активный день</th>
-                                <th>Сообщений в этот день</th>
-                            </tr>
-                        </thead>
-                        <tbody id="allUsersBody"></tbody>
-                    </table>
-                </div>
-                
-                <!-- 2. Активность по дням -->
-                <div class="stat-card">
-                    <h3>📅 Самые активные дни</h3>
-                    <div id="topDaysStats"></div>
-                </div>
-                
-                <!-- 3. Фотографии -->
-                <div class="stat-card">
-                    <h3>📸 Топ по фото</h3>
-                    <table id="photosTable">
-                        <thead><tr><th>Участник</th><th>Фото</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                
-                <!-- 4. Кружочки (видеосообщения) -->
-                <div class="stat-card">
-                    <h3>⏺️ Топ по видеосообщениям</h3>
-                    <table id="videosTable">
-                        <thead><tr><th>Участник</th><th>Кружочки</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                
-                <!-- 5. Самый тихий день -->
-                <div class="stat-card">
-                    <h3>🌙 Самый тихий день</h3>
-                    <div id="quietDay"></div>
-                </div>
-                
-                <!-- 6. ПИКОВЫЕ ДНИ КАЖДОГО УЧАСТНИКА -->
-                <div class="stat-card wide">
-                    <h3>📈 Самый активный день у каждого участника</h3>
-                    <div id="userPeakDays" class="user-peak-grid"></div>
-                </div>
-            </div>
-        </div>
+        <div id="results"></div>
     </div>
 
     <script>
-    async function analyzeChat() {
+    function analyze() {
         const fileInput = document.getElementById('fileInput');
+        const errorDiv = document.getElementById('error');
+        const successDiv = document.getElementById('success');
         const resultsDiv = document.getElementById('results');
-        const loadingDiv = document.getElementById('loading');
-        const progressBar = document.getElementById('progressBar');
+        
+        errorDiv.innerHTML = '';
+        errorDiv.classList.add('hidden');
+        successDiv.classList.add('hidden');
+        resultsDiv.innerHTML = '';
         
         if (!fileInput.files[0]) {
-            alert('Пожалуйста, выберите файл result.json');
+            showError('Выберите файл result.json');
             return;
         }
         
-        loadingDiv.classList.remove('hidden');
-        resultsDiv.classList.add('hidden');
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                
+                // Показываем структуру данных для отладки
+                console.log('Структура файла:', Object.keys(data));
+                if (data.messages) console.log('Количество сообщений:', data.messages.length);
+                
+                // Проверяем структуру
+                if (!data.messages || !Array.isArray(data.messages)) {
+                    showError('В файле нет массива messages. Структура файла: ' + JSON.stringify(Object.keys(data)));
+                    return;
+                }
+                
+                const messages = data.messages;
+                showSuccess(`Загружено ${messages.length} сообщений`);
+                
+                // Простой анализ
+                const users = {};
+                const days = {};
+                const userDays = {};
+                
+                messages.forEach(msg => {
+                    // Определяем пользователя
+                    let user = 'Неизвестный';
+                    if (msg.from) user = msg.from;
+                    else if (msg.from_id) user = 'ID:' + msg.from_id;
+                    
+                    users[user] = (users[user] || 0) + 1;
+                    
+                    // Дата
+                    if (msg.date) {
+                        const date = new Date(msg.date);
+                        const dayKey = date.toLocaleDateString('ru-RU');
+                        days[dayKey] = (days[dayKey] || 0) + 1;
+                        
+                        // Для каждого пользователя
+                        if (!userDays[user]) userDays[user] = {};
+                        userDays[user][dayKey] = (userDays[user][dayKey] || 0) + 1;
+                    }
+                });
+                
+                // Формируем результаты
+                let html = '<div class="card">';
+                html += '<h3>📈 Основная статистика</h3>';
+                html += `<p><strong>Всего сообщений:</strong> ${messages.length}</p>`;
+                html += `<p><strong>Уникальных участников:</strong> ${Object.keys(users).length}</p>`;
+                html += '</div>';
+                
+                // Топ участников
+                html += '<div class="card"><h3>👥 Топ участников</h3><table>';
+                html += '<tr><th>Участник</th><th>Сообщений</th><th>Самый активный день</th><th>Сообщений в этот день</th></tr>';
+                
+                const sortedUsers = Object.entries(users).sort((a, b) => b[1] - a[1]);
+                sortedUsers.forEach(([user, count]) => {
+                    // Находим пиковый день для этого пользователя
+                    let peakDay = '-';
+                    let peakCount = 0;
+                    
+                    if (userDays[user]) {
+                        Object.entries(userDays[user]).forEach(([day, dayCount]) => {
+                            if (dayCount > peakCount) {
+                                peakCount = dayCount;
+                                peakDay = day;
+                            }
+                        });
+                    }
+                    
+                    html += `<tr>
+                        <td>${user}</td>
+                        <td>${count}</td>
+                        <td>${peakDay}</td>
+                        <td>${peakCount || '-'}</td>
+                    </tr>`;
+                });
+                
+                html += '</table></div>';
+                
+                // Самые активные дни
+                html += '<div class="card"><h3>📅 Самые активные дни</h3><table>';
+                html += '<tr><th>День</th><th>Сообщений</th></tr>';
+                
+                const sortedDays = Object.entries(days).sort((a, b) => b[1] - a[1]).slice(0, 10);
+                sortedDays.forEach(([day, count]) => {
+                    html += `<tr><td>${day}</td><td>${count}</td></tr>`;
+                });
+                
+                html += '</table></div>';
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                showError('Ошибка: ' + error.message + '<br>Подсказка: Возможно, файл поврежден или имеет неверный формат.');
+            }
+        };
         
-        try {
-            const text = await fileInput.files[0].text();
-            progressBar.style.width = '30%';
-            
-            const data = JSON.parse(text);
-            const messages = data.messages || [];
-            progressBar.style.width = '60%';
-            
-            if (messages.length === 0) {
-                alert('В файле нет сообщений');
-                return;
-            }
-            
-            // СТАТИСТИКА
-            const stats = {
-                users: {},
-                days: {}, // Общая активность по дням
-                photos: {},
-                videos: {},
-                userDays: {} // Активность по дням для каждого пользователя
-            };
-            
-            // АНАЛИЗ СООБЩЕНИЙ
-            messages.forEach((msg, index) => {
-                if (index % 1000 === 0) {
-                    progressBar.style.width = `${60 + (index / messages.length * 30)}%`;
-                }
-                
-                const user = msg.from || (msg.from_id && String(msg.from_id).replace('user', '')) || 'Неизвестный';
-                
-                // Общий счетчик сообщений
-                stats.users[user] = (stats.users[user] || 0) + 1;
-                
-                // День
-                if (msg.date) {
-                    const date = new Date(msg.date);
-                    const dayKey = date.toLocaleDateString('ru-RU'); // "15.03.2024"
-                    const dayFormatted = date.toLocaleDateString('ru-RU', { 
-                        weekday: 'short', 
-                        day: 'numeric', 
-                        month: 'short',
-                        year: 'numeric'
-                    }); // "пт, 15 мар. 2024 г."
-                    
-                    // Общая активность по дням
-                    stats.days[dayKey] = (stats.days[dayKey] || 0) + 1;
-                    
-                    // Активность по дням ДЛЯ КАЖДОГО ПОЛЬЗОВАТЕЛЯ
-                    if (!stats.userDays[user]) {
-                        stats.userDays[user] = {};
-                    }
-                    if (!stats.userDays[user][dayKey]) {
-                        stats.userDays[user][dayKey] = {
-                            count: 0,
-                            formatted: dayFormatted
-                        };
-                    }
-                    stats.userDays[user][dayKey].count += 1;
-                }
-                
-                // Фото
-                if (msg.media_type === 'photo' || msg.photo || 
-                    msg.text_entities?.some(e => e.type === 'photo') ||
-                    (msg.text && msg.text.toLowerCase().includes('photo'))) {
-                    stats.photos[user] = (stats.photos[user] || 0) + 1;
-                }
-                
-                // Видеосообщения
-                if (msg.media_type === 'video_message' || msg.video_message || 
-                    (msg.text && (msg.text.includes('видеосообщение') || 
-                    msg.text.includes('video_message') ||
-                    msg.text.includes('кружок')))) {
-                    stats.videos[user] = (stats.videos[user] || 0) + 1;
-                }
-            });
-            
-            progressBar.style.width = '100%';
-            
-            // НАХОДИМ ПИКОВЫЙ ДЕНЬ ДЛЯ КАЖДОГО УЧАСТНИКА
-            const userPeaks = {};
-            Object.keys(stats.userDays).forEach(user => {
-                const days = stats.userDays[user];
-                let peakDay = '';
-                let peakDayFormatted = '';
-                let peakCount = 0;
-                
-                Object.entries(days).forEach(([dayKey, data]) => {
-                    if (data.count > peakCount) {
-                        peakCount = data.count;
-                        peakDay = dayKey;
-                        peakDayFormatted = data.formatted;
-                    }
-                });
-                
-                userPeaks[user] = {
-                    day: peakDay,
-                    dayFormatted: peakDayFormatted,
-                    count: peakCount,
-                    total: stats.users[user]
-                };
-            });
-            
-            // ВЫВОДИМ ВСЕХ УЧАСТНИКОВ С ИХ ПИКОВЫМ ДНЕМ
-            const allUsersSorted = Object.entries(stats.users)
-                .sort((a, b) => b[1] - a[1]);
-            
-            let allUsersHTML = '';
-            const medals = ['🥇', '🥈', '🥉', '4.', '5.', '6.', '7.', '8.', '9.', '10.'];
-            
-            allUsersSorted.forEach(([user, totalCount], index) => {
-                const medal = medals[index] || `${index + 1}.`;
-                const peak = userPeaks[user] || { dayFormatted: 'Нет данных', count: 0 };
-                
-                allUsersHTML += `
-                    <tr>
-                        <td><span class="medal">${medal}</span></td>
-                        <td><strong>${user}</strong></td>
-                        <td>${totalCount}</td>
-                        <td>
-                            ${peak.dayFormatted ? `
-                                <span class="day-badge">${peak.dayFormatted}</span>
-                            ` : '—'}
-                        </td>
-                        <td><span class="peak-count">${peak.count || '—'}</span></td>
-                    </tr>
-                `;
-            });
-            document.getElementById('allUsersBody').innerHTML = allUsersHTML;
-            
-            // ТОП-10 САМЫХ АКТИВНЫХ ДНЕЙ
-            const daysSorted = Object.entries(stats.days)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-            
-            let topDaysHTML = '';
-            daysSorted.forEach(([dayKey, count], index) => {
-                const date = new Date(dayKey.split('.').reverse().join('-'));
-                const formatted = date.toLocaleDateString('ru-RU', { 
-                    weekday: 'long', 
-                    day: 'numeric', 
-                    month: 'long',
-                    year: 'numeric'
-                });
-                
-                topDaysHTML += `
-                    <div style="margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 8px;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>${index + 1}. ${formatted}</span>
-                            <span><strong>${count}</strong> сообщ.</span>
-                        </div>
-                    </div>
-                `;
-            });
-            document.getElementById('topDaysStats').innerHTML = topDaysHTML;
-            
-            // САМЫЙ ТИХИЙ ДЕНЬ
-            const allDays = Object.entries(stats.days);
-            const quietDay = allDays.length > 0 
-                ? allDays.sort((a, b) => a[1] - b[1])[0]
-                : ['Нет данных', 0];
-            
-            if (quietDay[0] !== 'Нет данных') {
-                const date = new Date(quietDay[0].split('.').reverse().join('-'));
-                const formatted = date.toLocaleDateString('ru-RU', { 
-                    weekday: 'long', 
-                    day: 'numeric', 
-                    month: 'long',
-                    year: 'numeric'
-                });
-                
-                document.getElementById('quietDay').innerHTML = `
-                    <div style="text-align: center; padding: 15px;">
-                        <div style="font-size: 1.2em; color: #95a5a6;">${formatted}</div>
-                        <div style="font-size: 1.5em; color: #7f8c8d;">${quietDay[1]} сообщений</div>
-                        <div style="margin-top: 10px; color: #bdc3c7;">
-                            <small>День с наименьшей активностью</small>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // ТОП ПО ФОТО
-            const photosSorted = Object.entries(stats.photos)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-            
-            let photosHTML = '';
-            photosSorted.forEach(([user, count]) => {
-                photosHTML += `
-                    <tr>
-                        <td>${user}</td>
-                        <td><span class="badge photo-badge">${count} фото</span></td>
-                    </tr>
-                `;
-            });
-            document.querySelector('#photosTable tbody').innerHTML = photosHTML;
-            
-            // ТОП ПО ВИДЕОСООБЩЕНИЯМ
-            const videosSorted = Object.entries(stats.videos)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-            
-            let videosHTML = '';
-            videosSorted.forEach(([user, count]) => {
-                videosHTML += `
-                    <tr>
-                        <td>${user}</td>
-                        <td><span class="badge video-badge">${count} кружочков</span></td>
-                    </tr>
-                `;
-            });
-            document.querySelector('#videosTable tbody').innerHTML = videosHTML;
-            
-            // ВИЗУАЛИЗАЦИЯ ПИКОВЫХ ДНЕЙ
-            let userPeaksHTML = '';
-            
-            // Сортируем по количеству сообщений в пиковый день
-            const peaksSorted = Object.entries(userPeaks)
-                .sort((a, b) => b[1].count - a[1].count)
-                .slice(0, 25); // Показываем топ-25
-            
-            peaksSorted.forEach(([user, data]) => {
-                if (data.dayFormatted && data.count > 0) {
-                    // Сокращаем формат дня
-                    const shortDay = data.dayFormatted
-                        .replace(' г.', '')
-                        .replace(/^(\w{3}), /, '');
-                    
-                    userPeaksHTML += `
-                        <div class="user-peak-item">
-                            <div class="user-name">${user}</div>
-                            <div class="peak-day">${shortDay}</div>
-                            <div class="peak-count">${data.count} сообщений в этот день</div>
-                            <div class="total-count-small">Всего сообщений: ${data.total}</div>
-                        </div>
-                    `;
-                }
-            });
-            
-            document.getElementById('userPeakDays').innerHTML = userPeaksHTML;
-            
-            // ОБЩЕЕ КОЛИЧЕСТВО
-            document.getElementById('totalMessages').textContent = 
-                `📨 Всего сообщений: ${messages.length.toLocaleString()}`;
-            
-            // ПОКАЗЫВАЕМ РЕЗУЛЬТАТЫ
-            setTimeout(() => {
-                loadingDiv.classList.add('hidden');
-                resultsDiv.classList.remove('hidden');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 500);
-            
-        } catch (error) {
-            alert('Ошибка: ' + error.message);
-            console.error(error);
-            loadingDiv.classList.add('hidden');
-        }
+        reader.onerror = function() {
+            showError('Ошибка при чтении файла');
+        };
+        
+        reader.readAsText(fileInput.files[0]);
+    }
+    
+    function showError(message) {
+        const errorDiv = document.getElementById('error');
+        errorDiv.innerHTML = '❌ ' + message;
+        errorDiv.classList.remove('hidden');
+    }
+    
+    function showSuccess(message) {
+        const successDiv = document.getElementById('success');
+        successDiv.innerHTML = '✅ ' + message;
+        successDiv.classList.remove('hidden');
     }
     
     // Автозагрузка при выборе файла
-    document.getElementById('fileInput').addEventListener('change', function() {
-        if (this.files[0]) {
-            analyzeChat();
-        }
-    });
+    document.getElementById('fileInput').addEventListener('change', analyze);
     </script>
 </body>
 </html>
