@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Telegram Chat Stats</title>
+    <meta charset="utf-8">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .upload-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 3px dashed #3498db;
+        }
+        input[type="file"] {
+            padding: 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            margin: 15px;
+            width: 70%;
+        }
+        button {
+            background: linear-gradient(45deg, #2ecc71, #1abc9c);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 15px;
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+        }
+        .stat-card h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            color: #495057;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .medal {
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+        .month-bar {
+            height: 20px;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            border-radius: 10px;
+            margin: 5px 0;
+            transition: width 0.5s;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .photo-badge { background: #e3f2fd; color: #1976d2; }
+        .video-badge { background: #f3e5f5; color: #7b1fa2; }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #666;
+        }
+        .hidden { display: none; }
+        .total-count {
+            font-size: 2.5em;
+            color: #2c3e50;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Telegram Chat Analyzer PRO</h1>
+        
+        <div class="upload-section">
+            <h2>1. Загрузите файл result.json</h2>
+            <input type="file" id="fileInput" accept=".json">
+            <br>
+            <button onclick="analyzeChat()">🚀 Запустить анализ</button>
+        </div>
+        
+        <div id="loading" class="loading hidden">
+            <p>🔍 Анализирую данные... Это займет несколько секунд</p>
+            <div style="width: 100%; height: 4px; background: #eee; border-radius: 2px; margin: 20px auto;">
+                <div id="progressBar" style="width: 0%; height: 100%; background: #2ecc71; border-radius: 2px; transition: width 0.5s;"></div>
+            </div>
+        </div>
+        
+        <div id="results" class="hidden">
+            <div class="total-count" id="totalMessages"></div>
+            
+            <div class="stats-grid">
+                <!-- 1. Все участники -->
+                <div class="stat-card">
+                    <h3>👥 Все участники</h3>
+                    <table id="allUsersTable">
+                        <thead>
+                            <tr><th>Место</th><th>Участник</th><th>Сообщений</th></tr>
+                        </thead>
+                        <tbody id="allUsersBody"></tbody>
+                    </table>
+                </div>
+                
+                <!-- 2. Самый активный месяц -->
+                <div class="stat-card">
+                    <h3>📅 Активность по месяцам</h3>
+                    <div id="monthsStats"></div>
+                </div>
+                
+                <!-- 3. Фотографии -->
+                <div class="stat-card">
+                    <h3>📸 Топ по фото</h3>
+                    <table id="photosTable">
+                        <thead><tr><th>Участник</th><th>Фото</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                
+                <!-- 4. Кружочки (видеосообщения) -->
+                <div class="stat-card">
+                    <h3>⏺️ Топ по видеосообщениям</h3>
+                    <table id="videosTable">
+                        <thead><tr><th>Участник</th><th>Кружочки</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- 5. Самый тихий месяц -->
+            <div class="stat-card" style="margin-top: 25px;">
+                <h3>🌙 Самый тихий месяц</h3>
+                <div id="quietMonth"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    async function analyzeChat() {
+        const fileInput = document.getElementById('fileInput');
+        const resultsDiv = document.getElementById('results');
+        const loadingDiv = document.getElementById('loading');
+        const progressBar = document.getElementById('progressBar');
+        
+        if (!fileInput.files[0]) {
+            alert('Пожалуйста, выберите файл result.json');
+            return;
+        }
+        
+        // Показываем загрузку
+        loadingDiv.classList.remove('hidden');
+        resultsDiv.classList.add('hidden');
+        
+        try {
+            const text = await fileInput.files[0].text();
+            progressBar.style.width = '30%';
+            
+            const data = JSON.parse(text);
+            const messages = data.messages || [];
+            progressBar.style.width = '60%';
+            
+            if (messages.length === 0) {
+                alert('В файле нет сообщений');
+                return;
+            }
+            
+            // Статистика
+            const stats = {
+                users: {},
+                months: {},
+                photos: {},
+                videos: {}
+            };
+            
+            // Анализ каждого сообщения
+            messages.forEach((msg, index) => {
+                // Прогресс бар
+                if (index % 1000 === 0) {
+                    progressBar.style.width = `${60 + (index / messages.length * 30)}%`;
+                }
+                
+                // Участник
+                const user = msg.from || (msg.from_id && String(msg.from_id).replace('user', '')) || 'Неизвестный';
+                stats.users[user] = (stats.users[user] || 0) + 1;
+                
+                // Месяц
+                if (msg.date) {
+                    const date = new Date(msg.date);
+                    const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    const monthName = date.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+                    stats.months[monthName] = (stats.months[monthName] || 0) + 1;
+                }
+                
+                // Фотографии
+                if (msg.media_type === 'photo' || msg.photo || msg.text_entities?.some(e => e.type === 'photo')) {
+                    stats.photos[user] = (stats.photos[user] || 0) + 1;
+                }
+                
+                // Видеосообщения (кружочки)
+                if (msg.media_type === 'video_message' || msg.video_message || 
+                    (msg.text && msg.text.includes('видеосообщение'))) {
+                    stats.videos[user] = (stats.videos[user] || 0) + 1;
+                }
+            });
+            
+            progressBar.style.width = '100%';
+            
+            // 1. ВСЕ УЧАСТНИКИ
+            const allUsersSorted = Object.entries(stats.users)
+                .sort((a, b) => b[1] - a[1]);
+            
+            let allUsersHTML = '';
+            const medals = ['🥇', '🥈', '🥉', '4.', '5.', '6.', '7.', '8.', '9.', '10.'];
+            allUsersSorted.forEach(([user, count], index) => {
+                const medal = medals[index] || `${index + 1}.`;
+                allUsersHTML += `
+                    <tr>
+                        <td><span class="medal">${medal}</span></td>
+                        <td>${user}</td>
+                        <td><strong>${count}</strong></td>
+                    </tr>
+                `;
+            });
+            document.getElementById('allUsersBody').innerHTML = allUsersHTML;
+            
+            // 2. АКТИВНОСТЬ ПО МЕСЯЦАМ
+            const monthsSorted = Object.entries(stats.months)
+                .sort((a, b) => b[1] - a[1]);
+            
+            const maxMonthCount = Math.max(...monthsSorted.map(m => m[1]));
+            
+            let monthsHTML = '';
+            monthsSorted.forEach(([month, count]) => {
+                const width = (count / maxMonthCount * 100);
+                monthsHTML += `
+                    <div style="margin: 10px 0;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>${month}</span>
+                            <span><strong>${count}</strong> сообщ.</span>
+                        </div>
+                        <div class="month-bar" style="width: ${width}%"></div>
+                    </div>
+                `;
+            });
+            document.getElementById('monthsStats').innerHTML = monthsHTML;
+            
+            // 3. САМЫЙ ТИХИЙ МЕСЯЦ
+            const quietMonth = monthsSorted.length > 0 
+                ? monthsSorted[monthsSorted.length - 1] 
+                : ['Нет данных', 0];
+            document.getElementById('quietMonth').innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 2em; color: #95a5a6;">${quietMonth[0]}</div>
+                    <div style="font-size: 1.2em; color: #7f8c8d;">${quietMonth[1]} сообщений</div>
+                    <div style="margin-top: 15px; color: #bdc3c7;">
+                        <small>Месяц с наименьшей активностью</small>
+                    </div>
+                </div>
+            `;
+            
+            // 4. ТОП ПО ФОТО
+            const photosSorted = Object.entries(stats.photos)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            let photosHTML = '';
+            photosSorted.forEach(([user, count]) => {
+                photosHTML += `
+                    <tr>
+                        <td>${user}</td>
+                        <td><span class="badge photo-badge">${count} фото</span></td>
+                    </tr>
+                `;
+            });
+            document.querySelector('#photosTable tbody').innerHTML = photosHTML;
+            
+            // 5. ТОП ПО ВИДЕОСООБЩЕНИЯМ
+            const videosSorted = Object.entries(stats.videos)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            let videosHTML = '';
+            videosSorted.forEach(([user, count]) => {
+                videosHTML += `
+                    <tr>
+                        <td>${user}</td>
+                        <td><span class="badge video-badge">${count} кружочков</span></td>
+                    </tr>
+                `;
+            });
+            document.querySelector('#videosTable tbody').innerHTML = videosHTML;
+            
+            // 6. ОБЩЕЕ КОЛИЧЕСТВО
+            document.getElementById('totalMessages').textContent = 
+                `📨 Всего сообщений: ${messages.length.toLocaleString()}`;
+            
+            // Показываем результаты
+            setTimeout(() => {
+                loadingDiv.classList.add('hidden');
+                resultsDiv.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 500);
+            
+        } catch (error) {
+            alert('Ошибка: ' + error.message);
+            console.error(error);
+            loadingDiv.classList.add('hidden');
+        }
+    }
+    
+    // Автозагрузка при выборе файла
+    document.getElementById('fileInput').addEventListener('change', function() {
+        if (this.files[0]) {
+            analyzeChat();
+        }
+    });
+    </script>
+</body>
+</html>
