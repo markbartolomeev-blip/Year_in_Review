@@ -1,171 +1,643 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Telegram Stats</title>
+    <title>Telegram Stats - Полный анализ</title>
     <meta charset="utf-8">
     <style>
-        body { font-family: Arial; padding: 20px; background: #f0f2f5; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 30px; border-radius: 10px; }
-        h1 { color: #2c3e50; text-align: center; }
-        .card { background: white; padding: 20px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        th { background: #f8f9fa; }
-        .error { color: red; background: #ffe6e6; padding: 10px; border-radius: 5px; margin: 10px 0; }
-        .success { color: green; background: #e6ffe6; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .upload-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 3px dashed #3498db;
+        }
+        input[type="file"] {
+            padding: 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            margin: 15px;
+            width: 70%;
+        }
+        button {
+            background: linear-gradient(45deg, #2ecc71, #1abc9c);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 15px;
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+        }
+        .stat-card.wide {
+            grid-column: span 2;
+        }
+        .stat-card h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            color: #495057;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .medal {
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .photo-badge { 
+            background: linear-gradient(45deg, #e3f2fd, #bbdefb); 
+            color: #1565c0;
+            border: 1px solid #90caf9;
+        }
+        .video-badge { 
+            background: linear-gradient(45deg, #f3e5f5, #e1bee7); 
+            color: #7b1fa2;
+            border: 1px solid #ce93d8;
+        }
+        .day-badge { 
+            background: #fff3e0; 
+            color: #ef6c00; 
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        .count-cell {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #666;
+        }
+        .hidden { display: none; }
+        .total-count {
+            font-size: 2.5em;
+            color: #2c3e50;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #dee2e6;
+        }
+        .media-icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+        .progress-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 5px;
+        }
+        .photo-progress { background: linear-gradient(90deg, #42a5f5, #1976d2); }
+        .video-progress { background: linear-gradient(90deg, #ab47bc, #7b1fa2); }
+        @media (max-width: 768px) {
+            .stat-card.wide { grid-column: span 1; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📊 Анализатор чата Telegram</h1>
+        <h1>📊 Telegram Chat - Полный анализ</h1>
         
-        <div class="card">
-            <h3>1. Выберите файл result.json</h3>
+        <div class="upload-section">
+            <h2>1. Загрузите файл result.json</h2>
             <input type="file" id="fileInput" accept=".json">
-            <button onclick="analyze()" style="padding: 10px 20px; margin-top: 10px;">Анализировать</button>
+            <br>
+            <button onclick="analyzeChat()">🚀 Запустить полный анализ</button>
         </div>
         
-        <div id="error" class="error hidden"></div>
-        <div id="success" class="success hidden"></div>
+        <div id="loading" class="loading hidden">
+            <p>🔍 Анализирую данные... Это займет несколько секунд</p>
+            <div class="progress-bar">
+                <div id="progressBar" class="progress-fill photo-progress" style="width: 0%"></div>
+            </div>
+        </div>
         
-        <div id="results"></div>
+        <div id="results" class="hidden">
+            <div class="total-count" id="totalMessages"></div>
+            
+            <div class="stats-grid">
+                <!-- 1. Все участники с пиковым днем -->
+                <div class="stat-card wide">
+                    <h3>👥 Все участники и их активность</h3>
+                    <table id="allUsersTable">
+                        <thead>
+                            <tr>
+                                <th>Место</th>
+                                <th>Участник</th>
+                                <th>Сообщений</th>
+                                <th>Самый активный день</th>
+                                <th>Сообщений в пик</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allUsersBody"></tbody>
+                    </table>
+                </div>
+                
+                <!-- 2. ФОТО ДЛЯ ВСЕХ УЧАСТНИКОВ -->
+                <div class="stat-card wide">
+                    <h3><span class="media-icon">📸</span> Фотографии - все участники</h3>
+                    <table id="allPhotosTable">
+                        <thead>
+                            <tr>
+                                <th>Участник</th>
+                                <th>Фото</th>
+                                <th>% от всех фото</th>
+                                <th>Прогресс</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allPhotosBody"></tbody>
+                    </table>
+                </div>
+                
+                <!-- 3. ВИДЕОСООБЩЕНИЯ ДЛЯ ВСЕХ УЧАСТНИКОВ -->
+                <div class="stat-card wide">
+                    <h3><span class="media-icon">⏺️</span> Видеосообщения - все участники</h3>
+                    <table id="allVideosTable">
+                        <thead>
+                            <tr>
+                                <th>Участник</th>
+                                <th>Кружочки</th>
+                                <th>% от всех видео</th>
+                                <th>Прогресс</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allVideosBody"></tbody>
+                    </table>
+                </div>
+                
+                <!-- 4. Статистика по дням -->
+                <div class="stat-card">
+                    <h3>📅 Топ-10 активных дней</h3>
+                    <div id="topDaysStats"></div>
+                </div>
+                
+                <!-- 5. Общая медиа-статистика -->
+                <div class="stat-card">
+                    <h3>📊 Медиа-статистика</h3>
+                    <div id="mediaStats"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-    function analyze() {
-        const fileInput = document.getElementById('fileInput');
-        const errorDiv = document.getElementById('error');
-        const successDiv = document.getElementById('success');
-        const resultsDiv = document.getElementById('results');
+    // ФУНКЦИЯ ДЛЯ ИЗВЛЕЧЕНИЯ ТЕКСТА ИЗ СООБЩЕНИЯ
+    function extractText(msg) {
+        if (!msg.text) return '';
         
-        errorDiv.innerHTML = '';
-        errorDiv.classList.add('hidden');
-        successDiv.classList.add('hidden');
-        resultsDiv.innerHTML = '';
+        // Если text - строка
+        if (typeof msg.text === 'string') {
+            return msg.text;
+        }
+        
+        // Если text - массив (частая структура Telegram)
+        if (Array.isArray(msg.text)) {
+            return msg.text.map(item => {
+                if (typeof item === 'string') return item;
+                if (item && typeof item === 'object' && item.text) {
+                    return item.text;
+                }
+                return '';
+            }).join(' ');
+        }
+        
+        // Если text - объект с полем text
+        if (msg.text && typeof msg.text === 'object' && msg.text.text) {
+            return msg.text.text;
+        }
+        
+        return '';
+    }
+
+    async function analyzeChat() {
+        const fileInput = document.getElementById('fileInput');
+        const resultsDiv = document.getElementById('results');
+        const loadingDiv = document.getElementById('loading');
+        const progressBar = document.getElementById('progressBar');
         
         if (!fileInput.files[0]) {
-            showError('Выберите файл result.json');
+            alert('Пожалуйста, выберите файл result.json');
             return;
         }
         
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                
-                // Показываем структуру данных для отладки
-                console.log('Структура файла:', Object.keys(data));
-                if (data.messages) console.log('Количество сообщений:', data.messages.length);
-                
-                // Проверяем структуру
-                if (!data.messages || !Array.isArray(data.messages)) {
-                    showError('В файле нет массива messages. Структура файла: ' + JSON.stringify(Object.keys(data)));
-                    return;
+        loadingDiv.classList.remove('hidden');
+        resultsDiv.classList.add('hidden');
+        
+        try {
+            const text = await fileInput.files[0].text();
+            progressBar.style.width = '20%';
+            
+            const data = JSON.parse(text);
+            const messages = data.messages || [];
+            progressBar.style.width = '40%';
+            
+            if (messages.length === 0) {
+                alert('В файле нет сообщений');
+                return;
+            }
+            
+            // СТАТИСТИКА
+            const stats = {
+                users: {},
+                days: {},
+                photos: {},
+                videos: {},
+                userDays: {},
+                totalPhotos: 0,
+                totalVideos: 0
+            };
+            
+            // АНАЛИЗ КАЖДОГО СООБЩЕНИЯ
+            messages.forEach((msg, index) => {
+                if (index % 1000 === 0) {
+                    progressBar.style.width = `${40 + (index / messages.length * 50)}%`;
                 }
                 
-                const messages = data.messages;
-                showSuccess(`Загружено ${messages.length} сообщений`);
+                // Определяем пользователя
+                let user = 'Неизвестный';
+                if (msg.from) user = msg.from;
+                else if (msg.from_id) {
+                    user = String(msg.from_id).startsWith('user') 
+                        ? 'ID:' + String(msg.from_id).replace('user', '')
+                        : 'ID:' + msg.from_id;
+                }
                 
-                // Простой анализ
-                const users = {};
-                const days = {};
-                const userDays = {};
+                // Общее количество сообщений
+                stats.users[user] = (stats.users[user] || 0) + 1;
                 
-                messages.forEach(msg => {
-                    // Определяем пользователя
-                    let user = 'Неизвестный';
-                    if (msg.from) user = msg.from;
-                    else if (msg.from_id) user = 'ID:' + msg.from_id;
+                // Дата сообщения
+                if (msg.date) {
+                    const date = new Date(msg.date);
+                    const dayKey = date.toLocaleDateString('ru-RU');
+                    const dayFormatted = date.toLocaleDateString('ru-RU', { 
+                        weekday: 'short', 
+                        day: 'numeric', 
+                        month: 'short'
+                    });
                     
-                    users[user] = (users[user] || 0) + 1;
+                    stats.days[dayKey] = (stats.days[dayKey] || 0) + 1;
                     
-                    // Дата
-                    if (msg.date) {
-                        const date = new Date(msg.date);
-                        const dayKey = date.toLocaleDateString('ru-RU');
-                        days[dayKey] = (days[dayKey] || 0) + 1;
-                        
-                        // Для каждого пользователя
-                        if (!userDays[user]) userDays[user] = {};
-                        userDays[user][dayKey] = (userDays[user][dayKey] || 0) + 1;
+                    if (!stats.userDays[user]) {
+                        stats.userDays[user] = {};
+                    }
+                    if (!stats.userDays[user][dayKey]) {
+                        stats.userDays[user][dayKey] = {
+                            count: 0,
+                            formatted: dayFormatted
+                        };
+                    }
+                    stats.userDays[user][dayKey].count += 1;
+                }
+                
+                // Извлекаем текст из сообщения
+                const messageText = extractText(msg).toLowerCase();
+                
+                // ФОТОГРАФИИ
+                let isPhoto = false;
+                
+                // Проверяем по media_type (самый надежный способ)
+                if (msg.media_type === 'photo' || msg.photo || msg.file === 'photo') {
+                    isPhoto = true;
+                }
+                // Проверяем по тексту
+                else if (messageText.includes('photo') || 
+                         messageText.includes('фото') ||
+                         messageText.includes('картинк') ||
+                         messageText.includes('image') ||
+                         messageText.includes('img')) {
+                    isPhoto = true;
+                }
+                // Проверяем text_entities
+                else if (msg.text_entities) {
+                    const entities = Array.isArray(msg.text_entities) ? msg.text_entities : [msg.text_entities];
+                    isPhoto = entities.some(e => 
+                        e.type === 'photo' || e.type === 'image'
+                    );
+                }
+                
+                if (isPhoto) {
+                    stats.photos[user] = (stats.photos[user] || 0) + 1;
+                    stats.totalPhotos++;
+                }
+                
+                // ВИДЕОСООБЩЕНИЯ (кружочки)
+                let isVideo = false;
+                
+                // Проверяем по media_type
+                if (msg.media_type === 'video_message' || 
+                    msg.video_message || 
+                    msg.file === 'video_message' ||
+                    msg.type === 'video_message') {
+                    isVideo = true;
+                }
+                // Проверяем по тексту
+                else if (messageText.includes('видеосообщение') || 
+                         messageText.includes('video_message') ||
+                         messageText.includes('кружок') ||
+                         messageText.includes('круглое видео') ||
+                         messageText.includes('video_note') ||
+                         messageText.includes('видеонота')) {
+                    isVideo = true;
+                }
+                
+                if (isVideo) {
+                    stats.videos[user] = (stats.videos[user] || 0) + 1;
+                    stats.totalVideos++;
+                }
+            });
+            
+            progressBar.style.width = '100%';
+            
+            // НАХОДИМ ПИКОВЫЙ ДЕНЬ ДЛЯ КАЖДОГО УЧАСТНИКА
+            const userPeaks = {};
+            Object.keys(stats.userDays).forEach(user => {
+                const days = stats.userDays[user];
+                let peakDay = '';
+                let peakDayFormatted = '';
+                let peakCount = 0;
+                
+                Object.entries(days).forEach(([dayKey, data]) => {
+                    if (data.count > peakCount) {
+                        peakCount = data.count;
+                        peakDay = dayKey;
+                        peakDayFormatted = data.formatted;
                     }
                 });
                 
-                // Формируем результаты
-                let html = '<div class="card">';
-                html += '<h3>📈 Основная статистика</h3>';
-                html += `<p><strong>Всего сообщений:</strong> ${messages.length}</p>`;
-                html += `<p><strong>Уникальных участников:</strong> ${Object.keys(users).length}</p>`;
-                html += '</div>';
+                userPeaks[user] = {
+                    day: peakDay,
+                    dayFormatted: peakDayFormatted,
+                    count: peakCount,
+                    total: stats.users[user],
+                    photos: stats.photos[user] || 0,
+                    videos: stats.videos[user] || 0
+                };
+            });
+            
+            // 1. ТАБЛИЦА ВСЕХ УЧАСТНИКОВ
+            const allUsersSorted = Object.entries(stats.users)
+                .sort((a, b) => b[1] - a[1]);
+            
+            let allUsersHTML = '';
+            const medals = ['🥇', '🥈', '🥉'];
+            
+            allUsersSorted.forEach(([user, totalCount], index) => {
+                const medal = index < 3 ? medals[index] : `${index + 1}.`;
+                const peak = userPeaks[user] || { dayFormatted: '-', count: 0 };
                 
-                // Топ участников
-                html += '<div class="card"><h3>👥 Топ участников</h3><table>';
-                html += '<tr><th>Участник</th><th>Сообщений</th><th>Самый активный день</th><th>Сообщений в этот день</th></tr>';
+                allUsersHTML += `
+                    <tr>
+                        <td><span class="medal">${medal}</span></td>
+                        <td><strong>${user}</strong></td>
+                        <td class="count-cell">${totalCount}</td>
+                        <td>
+                            ${peak.dayFormatted ? `
+                                <span class="day-badge">${peak.dayFormatted}</span>
+                            ` : '-'}
+                        </td>
+                        <td class="count-cell">${peak.count || '-'}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('allUsersBody').innerHTML = allUsersHTML;
+            
+            // 2. ВСЕ УЧАСТНИКИ ПО ФОТОГРАФИЯМ
+            const allPhotosSorted = Object.entries(stats.photos)
+                .sort((a, b) => b[1] - a[1]);
+            
+            let allPhotosHTML = '';
+            const maxPhotos = allPhotosSorted.length > 0 ? allPhotosSorted[0][1] : 1;
+            
+            allPhotosSorted.forEach(([user, photoCount], index) => {
+                const percentage = stats.totalPhotos > 0 
+                    ? ((photoCount / stats.totalPhotos) * 100).toFixed(1)
+                    : '0';
+                const progressWidth = maxPhotos > 0 ? (photoCount / maxPhotos * 100) : 0;
                 
-                const sortedUsers = Object.entries(users).sort((a, b) => b[1] - a[1]);
-                sortedUsers.forEach(([user, count]) => {
-                    // Находим пиковый день для этого пользователя
-                    let peakDay = '-';
-                    let peakCount = 0;
-                    
-                    if (userDays[user]) {
-                        Object.entries(userDays[user]).forEach(([day, dayCount]) => {
-                            if (dayCount > peakCount) {
-                                peakCount = dayCount;
-                                peakDay = day;
-                            }
-                        });
-                    }
-                    
-                    html += `<tr>
+                allPhotosHTML += `
+                    <tr>
                         <td>${user}</td>
-                        <td>${count}</td>
-                        <td>${peakDay}</td>
-                        <td>${peakCount || '-'}</td>
-                    </tr>`;
-                });
-                
-                html += '</table></div>';
-                
-                // Самые активные дни
-                html += '<div class="card"><h3>📅 Самые активные дни</h3><table>';
-                html += '<tr><th>День</th><th>Сообщений</th></tr>';
-                
-                const sortedDays = Object.entries(days).sort((a, b) => b[1] - a[1]).slice(0, 10);
-                sortedDays.forEach(([day, count]) => {
-                    html += `<tr><td>${day}</td><td>${count}</td></tr>`;
-                });
-                
-                html += '</table></div>';
-                
-                resultsDiv.innerHTML = html;
-                
-            } catch (error) {
-                showError('Ошибка: ' + error.message + '<br>Подсказка: Возможно, файл поврежден или имеет неверный формат.');
+                        <td class="count-cell">
+                            <span class="badge photo-badge">${photoCount}</span>
+                        </td>
+                        <td>${percentage}%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill photo-progress" style="width: ${progressWidth}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            if (allPhotosSorted.length === 0) {
+                allPhotosHTML = '<tr><td colspan="4" style="text-align: center; color: #999; padding: 30px;">📭 Фотографий не найдено</td></tr>';
             }
-        };
-        
-        reader.onerror = function() {
-            showError('Ошибка при чтении файла');
-        };
-        
-        reader.readAsText(fileInput.files[0]);
-    }
-    
-    function showError(message) {
-        const errorDiv = document.getElementById('error');
-        errorDiv.innerHTML = '❌ ' + message;
-        errorDiv.classList.remove('hidden');
-    }
-    
-    function showSuccess(message) {
-        const successDiv = document.getElementById('success');
-        successDiv.innerHTML = '✅ ' + message;
-        successDiv.classList.remove('hidden');
+            document.getElementById('allPhotosBody').innerHTML = allPhotosHTML;
+            
+            // 3. ВСЕ УЧАСТНИКИ ПО ВИДЕОСООБЩЕНИЯМ
+            const allVideosSorted = Object.entries(stats.videos)
+                .sort((a, b) => b[1] - a[1]);
+            
+            let allVideosHTML = '';
+            const maxVideos = allVideosSorted.length > 0 ? allVideosSorted[0][1] : 1;
+            
+            allVideosSorted.forEach(([user, videoCount], index) => {
+                const percentage = stats.totalVideos > 0 
+                    ? ((videoCount / stats.totalVideos) * 100).toFixed(1)
+                    : '0';
+                const progressWidth = maxVideos > 0 ? (videoCount / maxVideos * 100) : 0;
+                
+                allVideosHTML += `
+                    <tr>
+                        <td>${user}</td>
+                        <td class="count-cell">
+                            <span class="badge video-badge">${videoCount}</span>
+                        </td>
+                        <td>${percentage}%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill video-progress" style="width: ${progressWidth}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            if (allVideosSorted.length === 0) {
+                allVideosHTML = '<tr><td colspan="4" style="text-align: center; color: #999; padding: 30px;">📭 Видеосообщений не найдено</td></tr>';
+            }
+            document.getElementById('allVideosBody').innerHTML = allVideosHTML;
+            
+            // 4. ТОП-10 АКТИВНЫХ ДНЕЙ
+            const daysSorted = Object.entries(stats.days)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            let topDaysHTML = '';
+            daysSorted.forEach(([dayKey, count], index) => {
+                const date = new Date(dayKey.split('.').reverse().join('-'));
+                const formatted = date.toLocaleDateString('ru-RU', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long'
+                });
+                
+                topDaysHTML += `
+                    <div style="margin: 8px 0; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span><strong>${index + 1}.</strong> ${formatted}</span>
+                            <span><strong>${count}</strong> сообщ.</span>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('topDaysStats').innerHTML = topDaysHTML;
+            
+            // 5. МЕДИА-СТАТИСТИКА
+            const mediaStatsHTML = `
+                <div style="text-align: center; padding: 15px;">
+                    <div style="margin-bottom: 20px;">
+                        <div style="font-size: 1.2em; color: #1565c0; margin-bottom: 5px;">📸 Фотографии</div>
+                        <div style="font-size: 2em; font-weight: bold; color: #1976d2;">${stats.totalPhotos}</div>
+                        <div style="color: #666; font-size: 14px;">отправлено в чате</div>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <div style="font-size: 1.2em; color: #7b1fa2; margin-bottom: 5px;">⏺️ Видеосообщения</div>
+                        <div style="font-size: 2em; font-weight: bold; color: #9c27b0;">${stats.totalVideos}</div>
+                        <div style="color: #666; font-size: 14px;">отправлено в чате</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 10px; border-radius: 10px; margin-top: 15px;">
+                        <div style="color: #666; font-size: 14px;">
+                            Всего медиафайлов: <strong>${stats.totalPhotos + stats.totalVideos}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('mediaStats').innerHTML = mediaStatsHTML;
+            
+            // ОБЩЕЕ КОЛИЧЕСТВО СООБЩЕНИЙ
+            document.getElementById('totalMessages').innerHTML = `
+                <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.8em; color: #666;">Всего сообщений</div>
+                        <div style="font-size: 1.2em; color: #2c3e50; font-weight: bold;">${messages.length.toLocaleString()}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.8em; color: #666;">Участников</div>
+                        <div style="font-size: 1.2em; color: #2c3e50; font-weight: bold;">${Object.keys(stats.users).length}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.8em; color: #666;">Фотографии</div>
+                        <div style="font-size: 1.2em; color: #1976d2; font-weight: bold;">${stats.totalPhotos}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.8em; color: #666;">Видеосообщения</div>
+                        <div style="font-size: 1.2em; color: #9c27b0; font-weight: bold;">${stats.totalVideos}</div>
+                    </div>
+                </div>
+            `;
+            
+            // ПОКАЗЫВАЕМ РЕЗУЛЬТАТЫ
+            setTimeout(() => {
+                loadingDiv.classList.add('hidden');
+                resultsDiv.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 500);
+            
+        } catch (error) {
+            alert('Ошибка: ' + error.message);
+            console.error('Детали ошибки:', error);
+            loadingDiv.classList.add('hidden');
+        }
     }
     
     // Автозагрузка при выборе файла
-    document.getElementById('fileInput').addEventListener('change', analyze);
+    document.getElementById('fileInput').addEventListener('change', function() {
+        if (this.files[0]) {
+            analyzeChat();
+        }
+    });
     </script>
 </body>
 </html>
